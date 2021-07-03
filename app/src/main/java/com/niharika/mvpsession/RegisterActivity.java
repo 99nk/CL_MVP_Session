@@ -26,9 +26,9 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
-    EditText mName,mEmail,mPassword,mPhone;
+    EditText mName,mEmail,mPassword;
     Button mRegister;
-    public String email,password;
+    public String email,password,name;
     TextView mLogin;
     FirebaseAuth mAuth;
     ProgressBar progressBar;
@@ -53,6 +53,7 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View v) {
                 email=mEmail.getText().toString().trim();
                 password=mPassword.getText().toString().trim();
+                name=mName.getText().toString().trim();
                 if(TextUtils.isEmpty(email))
                 {
                     mEmail.setError("Email is req");
@@ -68,7 +69,11 @@ public class RegisterActivity extends AppCompatActivity {
                     mPassword.setError("Min 6 char password");
                     return;
                 }
-                progressBar.setVisibility(View.VISIBLE);
+
+                /*Logic Part starts*/
+
+                progressBar.setVisibility(View.VISIBLE); //UI stuff
+
                 mAuth.createUserWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -81,13 +86,10 @@ public class RegisterActivity extends AppCompatActivity {
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if(!dataSnapshot.hasChild(current_user_id))
                                     {
-                                        String id =mAuth.getCurrentUser().getUid().toString();
-                                        String Mail=email;
-                                        String Name=mName.getText().toString().trim();
+                                        String id =mAuth.getCurrentUser().getUid();
                                         HashMap user1=new HashMap();
-                                        user1.put("name",Name);
-                                        user1.put("email",Mail);
-                                        user1.put("id",id);
+                                        user1.put("name",name);
+                                        user1.put("email",email);
                                         UserRef.child(id).updateChildren(user1).addOnCompleteListener(new OnCompleteListener() {
                                             @Override
                                             public void onComplete(@NonNull Task task) {
@@ -105,11 +107,13 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 }
                             });
+                            //UI stuff
                             Toast.makeText(RegisterActivity.this, "User Created", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         }
                         else
                         {
+                            //UI stuff
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(RegisterActivity.this, "Error "+task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -119,6 +123,8 @@ public class RegisterActivity extends AppCompatActivity {
 
             }
         });
+        /*logic part ends*/
+
         mLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
